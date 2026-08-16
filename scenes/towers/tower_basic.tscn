@@ -22,7 +22,7 @@ polygon = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 [node name="Cooldown" type="Timer" parent="."]
 
 [node name="ClickArea" type="Area2D" parent="."]
-collision_layer = 0
+collision_layer = 1
 collision_mask = 0
 input_pickable = true
 
