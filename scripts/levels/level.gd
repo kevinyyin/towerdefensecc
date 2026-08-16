@@ -15,6 +15,7 @@ const PATH_ATLAS_COORDS := Vector2i(1, 0)
 @onready var tile_map_layer: TileMapLayer = $TileMapLayer
 
 func _ready() -> void:
+	add_to_group(&"level")
 	_paint_grid()
 
 func _paint_grid() -> void:
@@ -51,3 +52,14 @@ func get_world_path() -> Array[Vector2]:
 
 func get_path_cells() -> Array[Vector2i]:
 	return _all_path_cells()
+
+func get_nearest_path_point(world_pos: Vector2) -> Vector2:
+	var nearest := Grid.cell_to_world(path_cells[0])
+	var nearest_dist := world_pos.distance_to(nearest)
+	for cell in _all_path_cells():
+		var point := Grid.cell_to_world(cell)
+		var dist := world_pos.distance_to(point)
+		if dist < nearest_dist:
+			nearest = point
+			nearest_dist = dist
+	return nearest

@@ -6,28 +6,28 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(32, 32)
 
-[node name="Tower" type="Area2D"]
+[node name="Artillery" type="Area2D"]
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("1")
-display_name = "Rapid Turret"
-range_radius = 110.0
-fire_rate = 2.5
-damage = 4.0
-cost = 30
-targeting_mode = 1
+display_name = "Artillery"
+range_radius = 190.0
+fire_rate = 0.5
+damage = 35.0
+cost = 90
+targeting_mode = 2
 projectile_scene = ExtResource("2")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 
 [node name="Visual" type="Polygon2D" parent="."]
-color = Color(0.2, 0.8, 0.8, 1)
+color = Color(0.75, 0.45, 0.15, 1)
 polygon = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 
 [node name="Cooldown" type="Timer" parent="."]
 
 [node name="ClickArea" type="Area2D" parent="."]
-collision_layer = 0
+collision_layer = 1
 collision_mask = 0
 input_pickable = true
 

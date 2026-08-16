@@ -1,5 +1,7 @@
 extends Area2D
 
+const DamageType = preload("res://scripts/combat/damage_type.gd")
+
 enum TargetingMode { FIRST_IN_PATH, CLOSEST_TO_TOWER, STRONGEST }
 
 @export var display_name := "Basic Turret"
@@ -8,6 +10,7 @@ enum TargetingMode { FIRST_IN_PATH, CLOSEST_TO_TOWER, STRONGEST }
 @export var damage := 10.0
 @export var cost := 50
 @export var targeting_mode: TargetingMode = TargetingMode.FIRST_IN_PATH
+@export var damage_type: DamageType.Type = DamageType.Type.PHYSICAL
 @export var projectile_scene: PackedScene
 
 @export var range_upgrade_amount := 30.0
@@ -18,8 +21,10 @@ enum TargetingMode { FIRST_IN_PATH, CLOSEST_TO_TOWER, STRONGEST }
 @onready var _click_area: Area2D = $ClickArea
 
 var _enemies_in_range: Array[Node2D] = []
+var _show_range := false
 
 func _ready() -> void:
+	add_to_group(&"towers")
 	_apply_range_shape()
 	collision_mask = 2
 
@@ -40,9 +45,32 @@ func _apply_range_shape() -> void:
 	shape.radius = range_radius
 	_collision_shape.shape = shape
 
+func _draw() -> void:
+	if _show_range:
+		draw_circle(Vector2.ZERO, range_radius, Color(0.3, 0.6, 1.0, 0.12))
+		draw_arc(Vector2.ZERO, range_radius, 0.0, TAU, 64, Color(0.3, 0.6, 1.0, 0.8), 2.0)
+
 func _on_click_area_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var opening := not _show_range
+		_close_other_towers()
+		_show_range = opening
+		queue_redraw()
 		print_stats()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		hide_range()
+
+func hide_range() -> void:
+	if _show_range:
+		_show_range = false
+		queue_redraw()
+
+func _close_other_towers() -> void:
+	for tower in get_tree().get_nodes_in_group(&"towers"):
+		if tower != self:
+			tower.hide_range()
 
 func print_stats() -> void:
 	print("Tower stats — range: %.0f  damage: %.0f  fire_rate: %.2f/s  cost: %d gold  targeting: %s" % [
@@ -85,7 +113,7 @@ func _on_cooldown_timeout() -> void:
 	var projectile := projectile_scene.instantiate()
 	get_tree().current_scene.add_child(projectile)
 	projectile.global_position = global_position
-	projectile.launch(target, damage)
+	projectile.launch(target, damage, damage_type)
 
 func _select_target() -> Node2D:
 	if _enemies_in_range.is_empty():

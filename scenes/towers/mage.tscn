@@ -6,16 +6,17 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(32, 32)
 
-[node name="Tower" type="Area2D"]
+[node name="Mage" type="Area2D"]
 collision_layer = 0
 collision_mask = 0
 script = ExtResource("1")
-display_name = "Sniper Post"
+display_name = "Mage"
 range_radius = 260.0
 fire_rate = 0.4
 damage = 50.0
 cost = 70
 targeting_mode = 0
+damage_type = 1
 projectile_scene = ExtResource("2")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -27,7 +28,7 @@ polygon = PackedVector2Array(-16, -16, 16, -16, 16, 16, -16, 16)
 [node name="Cooldown" type="Timer" parent="."]
 
 [node name="ClickArea" type="Area2D" parent="."]
-collision_layer = 0
+collision_layer = 1
 collision_mask = 0
 input_pickable = true
 
