@@ -42,3 +42,28 @@ layout_mode = 2
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "0"
+
+[node name="AbilityBar" type="HBoxContainer" parent="."]
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -76.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_vertical = 0
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="RainOfFireButton" type="Button" parent="AbilityBar"]
+custom_minimum_size = Vector2(150, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Rain of Fire"
+
+[node name="HeroAbilityButton" type="Button" parent="AbilityBar"]
+custom_minimum_size = Vector2(150, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Hero Ability"

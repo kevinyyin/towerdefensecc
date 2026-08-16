@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Grid="*res://scripts/autoload/grid.gd"
 GameManager="*res://scripts/autoload/game_manager.gd"
+ScreenShake="*res://scripts/autoload/screen_shake.gd"
 
 [display]
 

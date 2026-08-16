@@ -2,6 +2,10 @@ extends CharacterBody2D
 
 const DamageType = preload("res://scripts/combat/damage_type.gd")
 const HealthBar = preload("res://scripts/ui/health_bar.gd")
+const DeathExplosionScene = preload("res://scenes/effects/death_explosion.tscn")
+
+const HEAVY_DAMAGE_THRESHOLD := 20.0
+const HEAVY_HIT_SHAKE := 0.4
 
 signal health_changed(current_hp: float, max_hp: float)
 signal died(gold_reward: int)
@@ -93,11 +97,21 @@ func take_damage(amount: float, damage_type: DamageType.Type = DamageType.Type.P
 	current_hp -= mitigated
 	health_changed.emit(current_hp, max_hp)
 	_health_bar.fraction = current_hp / max_hp
+
+	if mitigated >= HEAVY_DAMAGE_THRESHOLD:
+		ScreenShake.shake(HEAVY_HIT_SHAKE)
+
 	if current_hp <= 0:
 		_release_melee_target()
+		_spawn_death_explosion()
 		died.emit(gold_reward)
 		queue_free()
 
 func _release_melee_target() -> void:
 	if _melee_target != null and is_instance_valid(_melee_target) and _melee_target.engaged_by == self:
 		_melee_target.engaged_by = null
+
+func _spawn_death_explosion() -> void:
+	var explosion := DeathExplosionScene.instantiate()
+	get_tree().current_scene.add_child(explosion)
+	explosion.global_position = global_position

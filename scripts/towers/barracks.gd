@@ -4,9 +4,12 @@ extends Node2D
 @export var cost := 60
 @export var spawn_interval := 10.0
 @export var squad_size := 3
+@export var max_alive := 3
 @export var ally_scene: PackedScene = preload("res://scenes/allies/ally.tscn")
 
 @onready var _spawn_timer: Timer = $SpawnTimer
+
+var _living_allies := 0
 
 func _ready() -> void:
 	_spawn_timer.wait_time = spawn_interval
@@ -15,13 +18,20 @@ func _ready() -> void:
 	_spawn_timer.start()
 
 func _on_spawn_timeout() -> void:
+	var to_spawn: int = min(squad_size, max_alive - _living_allies)
+	if to_spawn <= 0:
+		return
+
 	var level := get_tree().get_first_node_in_group(&"level")
 	var allies_container := level.get_node("AlliesContainer")
 	var rally_point: Vector2 = level.get_nearest_path_point(global_position)
 
-	for i in squad_size:
+	for i in to_spawn:
 		var ally := ally_scene.instantiate()
 		allies_container.add_child(ally)
 		var angle := TAU * i / squad_size
 		ally.global_position = global_position + Vector2(cos(angle), sin(angle)) * 20.0
 		ally.rally_point = rally_point
+
+		_living_allies += 1
+		ally.tree_exited.connect(func(): _living_allies -= 1)
