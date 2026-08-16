@@ -20,5 +20,7 @@ polygon = PackedVector2Array(0, -18, 18, 0, 0, 18, -18, 0)
 
 [node name="AttackCooldown" type="Timer" parent="."]
 
+[node name="AbilityTimer" type="Timer" parent="."]
+
 [node name="HealthBar" parent="." instance=ExtResource("2")]
 position = Vector2(0, -24)

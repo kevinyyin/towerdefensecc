@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/levels/level.gd" id="1"]
 [ext_resource type="TileSet" path="res://resources/tileset.tres" id="2"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://scenes/towers/tower_basic.tscn" id="5"]
 [ext_resource type="PackedScene" path="res://scenes/placement/build_pad.tscn" id="6"]
 [ext_resource type="PackedScene" path="res://scenes/hero/hero.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/spells/spell_manager.tscn" id="8"]
 
 [node name="Level1" type="Node2D"]
 script = ExtResource("1")
@@ -46,3 +47,5 @@ position = Vector2(608, 352)
 
 [node name="Hero" parent="." instance=ExtResource("7")]
 position = Vector2(96, 416)
+
+[node name="SpellManager" parent="." instance=ExtResource("8")]
