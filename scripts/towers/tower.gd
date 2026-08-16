@@ -2,7 +2,7 @@ extends Area2D
 
 const DamageType = preload("res://scripts/combat/damage_type.gd")
 
-enum TargetingMode { FIRST_IN_PATH, CLOSEST_TO_TOWER, STRONGEST }
+enum TargetingMode { FIRST_IN_PATH, CLOSEST_TO_TOWER, STRONGEST, LAST_IN_PATH }
 
 @export var display_name := "Basic Turret"
 @export var range_radius := 150.0
@@ -19,12 +19,14 @@ enum TargetingMode { FIRST_IN_PATH, CLOSEST_TO_TOWER, STRONGEST }
 @onready var _collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var _cooldown: Timer = $Cooldown
 @onready var _click_area: Area2D = $ClickArea
+@onready var _radial_menu: Node2D = $RadialMenu
 
 var _enemies_in_range: Array[Node2D] = []
 var _show_range := false
 
 func _ready() -> void:
 	add_to_group(&"towers")
+	_apply_stat_upgrades()
 	_apply_range_shape()
 	collision_mask = 2
 
@@ -39,6 +41,15 @@ func _ready() -> void:
 	get_viewport().physics_object_picking = true
 	_click_area.input_pickable = true
 	_click_area.input_event.connect(_on_click_area_input_event)
+
+func _apply_stat_upgrades() -> void:
+	match display_name:
+		"Archer":
+			fire_rate *= Upgrades.get_multiplier("archer_fire_rate")
+		"Mage":
+			damage *= Upgrades.get_multiplier("mage_damage")
+		"Artillery":
+			range_radius *= Upgrades.get_multiplier("artillery_range")
 
 func _apply_range_shape() -> void:
 	var shape := CircleShape2D.new()
@@ -55,6 +66,9 @@ func _on_click_area_input_event(_viewport: Node, event: InputEvent, _shape_idx: 
 		var opening := not _show_range
 		_close_other_towers()
 		_show_range = opening
+		_radial_menu.visible = opening
+		if opening:
+			_radial_menu.refresh_active_mode()
 		queue_redraw()
 		print_stats()
 
@@ -65,6 +79,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func hide_range() -> void:
 	if _show_range:
 		_show_range = false
+		_radial_menu.visible = false
 		queue_redraw()
 
 func _close_other_towers() -> void:
@@ -127,6 +142,10 @@ func _select_target() -> Node2D:
 		TargetingMode.STRONGEST:
 			return _enemies_in_range.reduce(func(best, e):
 				return e if e.current_hp > best.current_hp else best
+			)
+		TargetingMode.LAST_IN_PATH:
+			return _enemies_in_range.reduce(func(best, e):
+				return e if e.path_progress < best.path_progress else best
 			)
 		_: # FIRST_IN_PATH
 			return _enemies_in_range.reduce(func(best, e):

@@ -40,6 +40,15 @@ func start_wave(wave_number: int) -> void:
 	current_wave = wave_number
 	wave_started.emit(wave_number)
 
+func reset() -> void:
+	base_hp = max_base_hp
+	gold = starting_gold
+	current_wave = 0
+	is_game_over = false
+	health_changed.emit(base_hp, max_base_hp)
+	gold_changed.emit(gold)
+
 func _trigger_game_over() -> void:
 	is_game_over = true
 	game_over.emit()
+	get_tree().change_scene_to_file("res://scenes/menu/game_over.tscn")

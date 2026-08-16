@@ -4,6 +4,10 @@ extends CanvasLayer
 @onready var _gold_label: Label = $Margin/TopBar/GoldRow/GoldLabel
 @onready var _rain_of_fire_button: Button = $AbilityBar/RainOfFireButton
 @onready var _hero_ability_button: Button = $AbilityBar/HeroAbilityButton
+@onready var _start_wave_button: Button = $AbilityBar/StartWaveButton
+@onready var _fast_forward_button: Button = $AbilityBar/FastForwardButton
+
+var _fast_forward := false
 
 func _ready() -> void:
 	GameManager.health_changed.connect(_on_health_changed)
@@ -13,6 +17,8 @@ func _ready() -> void:
 
 	_rain_of_fire_button.pressed.connect(_on_rain_of_fire_pressed)
 	_hero_ability_button.pressed.connect(_on_hero_ability_pressed)
+	_start_wave_button.pressed.connect(_on_start_wave_pressed)
+	_fast_forward_button.pressed.connect(_on_fast_forward_pressed)
 
 	var spell_manager := get_tree().get_first_node_in_group(&"spell_manager")
 	if spell_manager:
@@ -23,6 +29,10 @@ func _ready() -> void:
 	if hero:
 		hero.ability_activated.connect(_on_hero_ability_activated)
 		hero.ability_ended.connect(_on_hero_ability_ended)
+
+	var wave_manager := get_tree().get_first_node_in_group(&"wave_manager")
+	if wave_manager:
+		wave_manager.waiting_for_next_wave.connect(_on_waiting_for_next_wave)
 
 func _on_health_changed(current_hp: int, _max_hp: int) -> void:
 	_health_label.text = "%d" % current_hp
@@ -55,3 +65,17 @@ func _on_hero_ability_activated(_duration: float) -> void:
 func _on_hero_ability_ended() -> void:
 	_hero_ability_button.disabled = false
 	_hero_ability_button.modulate.a = 1.0
+
+func _on_waiting_for_next_wave(is_waiting: bool) -> void:
+	_start_wave_button.disabled = not is_waiting
+	_start_wave_button.modulate.a = 1.0 if is_waiting else 0.4
+
+func _on_start_wave_pressed() -> void:
+	var wave_manager := get_tree().get_first_node_in_group(&"wave_manager")
+	if wave_manager:
+		wave_manager.start_next_wave_early()
+
+func _on_fast_forward_pressed() -> void:
+	_fast_forward = not _fast_forward
+	Engine.time_scale = 2.0 if _fast_forward else 1.0
+	_fast_forward_button.text = "1x Speed" if _fast_forward else "2x Speed"

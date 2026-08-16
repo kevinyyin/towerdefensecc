@@ -21,6 +21,7 @@ signal reached_end
 
 @onready var _attack_cooldown: Timer = $AttackCooldown
 @onready var _health_bar: HealthBar = $HealthBar
+@onready var _sprite: AnimatedSprite2D = $Visual
 
 var current_hp: float
 var path: Array[Vector2] = []
@@ -28,6 +29,8 @@ var path_progress := 0.0
 
 var _target_index := 1
 var _melee_target: Node2D = null
+var _action_playing := false
+var _dying := false
 
 func _ready() -> void:
 	current_hp = max_hp
@@ -38,6 +41,9 @@ func _ready() -> void:
 	_attack_cooldown.timeout.connect(_on_attack_cooldown_timeout)
 	_attack_cooldown.start()
 
+	_sprite.animation_finished.connect(_on_animation_finished)
+	_sprite.play(&"idle")
+
 func start(new_path: Array[Vector2]) -> void:
 	path = new_path
 	_target_index = 1
@@ -45,12 +51,17 @@ func start(new_path: Array[Vector2]) -> void:
 	global_position = path[0]
 
 func _physics_process(delta: float) -> void:
+	if _dying:
+		return
+
 	if _melee_target != null and not is_instance_valid(_melee_target):
 		_melee_target = null
 	if _melee_target == null:
 		_melee_target = _find_nearby_ally()
 	if _melee_target != null:
 		velocity = Vector2.ZERO
+		_face(_melee_target.global_position.x - global_position.x)
+		_set_locomotion_animation(&"idle")
 		return
 
 	if _target_index >= path.size():
@@ -73,7 +84,9 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity = to_target.normalized() * speed
 		path_progress += step
+		_face(velocity.x)
 
+	_set_locomotion_animation(&"walk" if velocity != Vector2.ZERO else &"idle")
 	move_and_slide()
 
 func _find_nearby_ally() -> Node2D:
@@ -86,10 +99,16 @@ func _find_nearby_ally() -> Node2D:
 	return null
 
 func _on_attack_cooldown_timeout() -> void:
+	if _dying:
+		return
 	if _melee_target != null and is_instance_valid(_melee_target):
 		_melee_target.take_damage(melee_damage)
+		_play_action(&"attack")
 
 func take_damage(amount: float, damage_type: DamageType.Type = DamageType.Type.PHYSICAL) -> void:
+	if _dying:
+		return
+
 	var mitigated := amount
 	if damage_type == DamageType.Type.PHYSICAL:
 		mitigated = max(amount - armor, 0.0)
@@ -102,10 +121,17 @@ func take_damage(amount: float, damage_type: DamageType.Type = DamageType.Type.P
 		ScreenShake.shake(HEAVY_HIT_SHAKE)
 
 	if current_hp <= 0:
+		_dying = true
+		remove_from_group(&"enemies")
 		_release_melee_target()
 		_spawn_death_explosion()
 		died.emit(gold_reward)
+		set_physics_process(false)
+		_sprite.play(&"death")
+		await _sprite.animation_finished
 		queue_free()
+	else:
+		_play_action(&"hurt")
 
 func _release_melee_target() -> void:
 	if _melee_target != null and is_instance_valid(_melee_target) and _melee_target.engaged_by == self:
@@ -115,3 +141,21 @@ func _spawn_death_explosion() -> void:
 	var explosion := DeathExplosionScene.instantiate()
 	get_tree().current_scene.add_child(explosion)
 	explosion.global_position = global_position
+
+func _play_action(anim_name: StringName) -> void:
+	_action_playing = true
+	_sprite.play(anim_name)
+
+func _on_animation_finished() -> void:
+	if _sprite.animation == &"attack" or _sprite.animation == &"hurt":
+		_action_playing = false
+
+func _face(dx: float) -> void:
+	if dx != 0.0:
+		_sprite.flip_h = dx > 0.0
+
+func _set_locomotion_animation(anim_name: StringName) -> void:
+	if _action_playing:
+		return
+	if _sprite.animation != anim_name:
+		_sprite.play(anim_name)
