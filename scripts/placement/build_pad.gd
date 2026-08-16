@@ -7,12 +7,14 @@ const TOWER_SCENES: Array[PackedScene] = [
 	preload("res://scenes/towers/barracks.tscn"),
 ]
 
-@onready var _menu: Control = $Menu
+const RADIUS := 80.0
+
+@onready var _menu: Node2D = $Menu
 @onready var _buttons: Array[Button] = [
-	$Menu/Panel/Buttons/ButtonArcher,
-	$Menu/Panel/Buttons/ButtonMage,
-	$Menu/Panel/Buttons/ButtonArtillery,
-	$Menu/Panel/Buttons/ButtonBarracks,
+	$Menu/ButtonArcher,
+	$Menu/ButtonMage,
+	$Menu/ButtonArtillery,
+	$Menu/ButtonBarracks,
 ]
 
 var _tower_costs: Array[int] = []
@@ -23,17 +25,38 @@ func _ready() -> void:
 	get_viewport().physics_object_picking = true
 	input_event.connect(_on_input_event)
 
+	_layout_buttons()
+
 	for i in TOWER_SCENES.size():
 		var scene := TOWER_SCENES[i]
 		var probe := scene.instantiate()
 		var button := _buttons[i]
 		button.text = "%s\n%d g" % [probe.display_name, probe.cost]
+		_style_button(button, probe.get_node("Visual").color)
 		_tower_costs.append(probe.cost)
 		probe.free()
 		button.pressed.connect(_on_tower_button_pressed.bind(i))
 
 	GameManager.gold_changed.connect(_update_button_states)
 	_update_button_states(GameManager.gold)
+
+func _layout_buttons() -> void:
+	for i in _buttons.size():
+		var angle := TAU * i / _buttons.size()
+		var button := _buttons[i]
+		var offset := Vector2(RADIUS, 0).rotated(angle)
+		button.position = offset - button.custom_minimum_size * 0.5
+
+func _style_button(button: Button, color: Color) -> void:
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = color
+	normal.corner_radius_top_left = 8
+	normal.corner_radius_top_right = 8
+	normal.corner_radius_bottom_left = 8
+	normal.corner_radius_bottom_right = 8
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", normal)
+	button.add_theme_stylebox_override("pressed", normal)
 
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:

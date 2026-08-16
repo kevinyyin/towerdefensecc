@@ -11,5 +11,5 @@
 [node name="HUD" parent="." instance=ExtResource("2")]
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(384, 256)
+position = Vector2(512, 288)
 script = ExtResource("3")

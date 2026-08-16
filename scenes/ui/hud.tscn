@@ -67,3 +67,16 @@ custom_minimum_size = Vector2(150, 60)
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = "Hero Ability"
+
+[node name="StartWaveButton" type="Button" parent="AbilityBar"]
+custom_minimum_size = Vector2(150, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+disabled = true
+text = "Start Wave"
+
+[node name="FastForwardButton" type="Button" parent="AbilityBar"]
+custom_minimum_size = Vector2(150, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "2x Speed"

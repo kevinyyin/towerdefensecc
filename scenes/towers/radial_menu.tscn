@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/towers/radial_menu.gd" id="1"]
+
+[node name="RadialMenu" type="Node2D"]
+visible = false
+script = ExtResource("1")
+
+[node name="ButtonFirst" type="Button" parent="."]
+custom_minimum_size = Vector2(64, 28)
+text = "First"
+
+[node name="ButtonLast" type="Button" parent="."]
+custom_minimum_size = Vector2(64, 28)
+text = "Last"
+
+[node name="ButtonStrongest" type="Button" parent="."]
+custom_minimum_size = Vector2(64, 28)
+text = "Strongest"
+
+[node name="ButtonSell" type="Button" parent="."]
+custom_minimum_size = Vector2(64, 28)
+text = "Sell"

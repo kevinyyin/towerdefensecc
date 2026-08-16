@@ -2,3 +2,17 @@
 .godot/
 /android/
 
+
+# macOS
+.DS_Store
+
+# Craftpix asset packs ship PSD/ASEPRITE/Tiled source files and marketing
+# material alongside the PNG/ folder actually used at runtime; keep those
+# out of the repo (still present on disk, just untracked).
+assets/**/PSD/
+assets/**/ASEPRITE/
+assets/**/Tiled_files/
+assets/**/COUPON.png
+assets/**/COUPON.png.import
+assets/**/COUPON.pdf
+assets/**/Free Assets Craftpix!.url

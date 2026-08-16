@@ -1,15 +1,23 @@
 extends Node2D
 
 const TILE_SOURCE_ID := 0
-const GRASS_ATLAS_COORDS := Vector2i(0, 0)
-const PATH_ATLAS_COORDS := Vector2i(1, 0)
+const GRASS_ATLAS_COORDS := Vector2i(16, 14)
+const PATH_ATLAS_COORDS := Vector2i(2, 2)
 
-@export var grid_size := Vector2i(12, 8)
+# The undead tileset's native tile size is 16px, while gameplay cells (Grid.CELL_SIZE)
+# are 64px, so each gameplay cell is painted as a 4x4 block of TileMapLayer cells.
+const TILES_PER_CELL := 4
+
+@export var grid_size := Vector2i(16, 9)
 @export var path_cells: Array[Vector2i] = [
 	Vector2i(0, 4),
-	Vector2i(6, 4),
-	Vector2i(6, 1),
-	Vector2i(11, 1),
+	Vector2i(3, 4),
+	Vector2i(3, 1),
+	Vector2i(7, 1),
+	Vector2i(7, 6),
+	Vector2i(11, 6),
+	Vector2i(11, 2),
+	Vector2i(15, 2),
 ]
 
 @onready var tile_map_layer: TileMapLayer = $TileMapLayer
@@ -21,10 +29,16 @@ func _ready() -> void:
 func _paint_grid() -> void:
 	for x in grid_size.x:
 		for y in grid_size.y:
-			tile_map_layer.set_cell(Vector2i(x, y), TILE_SOURCE_ID, GRASS_ATLAS_COORDS)
+			_paint_cell(Vector2i(x, y), GRASS_ATLAS_COORDS)
 
 	for cell in _all_path_cells():
-		tile_map_layer.set_cell(cell, TILE_SOURCE_ID, PATH_ATLAS_COORDS)
+		_paint_cell(cell, PATH_ATLAS_COORDS)
+
+func _paint_cell(cell: Vector2i, atlas_coords: Vector2i) -> void:
+	for sub_x in TILES_PER_CELL:
+		for sub_y in TILES_PER_CELL:
+			var sub_cell := cell * TILES_PER_CELL + Vector2i(sub_x, sub_y)
+			tile_map_layer.set_cell(sub_cell, TILE_SOURCE_ID, atlas_coords)
 
 # path_cells only marks the turns; this walks the straight runs between them
 # so every tile the enemy actually crosses gets painted, not just the corners.
